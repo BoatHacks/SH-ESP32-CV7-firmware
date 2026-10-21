@@ -1,5 +1,7 @@
 #include "N2kOutput.h"
 
+#include <cstdio>
+
 #include "Version.h"
 
 #define ESP32_CAN_TX_PIN GPIO_NUM_32
