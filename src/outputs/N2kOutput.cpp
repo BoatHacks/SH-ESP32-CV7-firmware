@@ -50,7 +50,9 @@ bool N2kOutput::sendWind(float angleRad, float speedMps) {
 bool N2kOutput::sendTemperature(float kelvin, uint8_t instance) {
   if (!open_) return false;
   tN2kMsg msg;
-  SetN2kPGN130312(msg, sid_, instance, N2kts_OutsideTemperature, kelvin);
+  // SID 0xFF (not available): temperature is not sampled together with the
+  // wind data, so it must not share the wind SID (see N2kMessages.h, SID).
+  SetN2kPGN130312(msg, N2kUInt8NA, instance, N2kts_OutsideTemperature, kelvin);
   return n2k.SendMsg(msg);
 }
 
