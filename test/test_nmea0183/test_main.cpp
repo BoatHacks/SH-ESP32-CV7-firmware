@@ -73,6 +73,11 @@ void test_parse_wind_values() {
   TEST_ASSERT_TRUE(parseBody("IIMWV,90,R,7,N,A", s));  // no decimals
   TEST_ASSERT_EQUAL_FLOAT(90.0f, s.angleDeg);
   TEST_ASSERT_EQUAL_FLOAT(7.0f, s.speedKnots);
+  // 360 is accepted (device may round up) and normalised to 0
+  TEST_ASSERT_TRUE(parseBody("IIMWV,360.0,R,1.0,N,A", s));
+  TEST_ASSERT_EQUAL_FLOAT(0.0f, s.angleDeg);
+  TEST_ASSERT_TRUE(parseBody("IIMWV,360,R,1.0,N,A", s));
+  TEST_ASSERT_EQUAL_FLOAT(0.0f, s.angleDeg);
 }
 
 void test_parse_wind_rejects() {
@@ -93,7 +98,7 @@ void test_parse_wind_rejects() {
   TEST_ASSERT_FALSE(parseBody("IIMWV,1e2,R,5.0,N,A", s));       // exponent
   TEST_ASSERT_FALSE(parseBody("IIMWV, 225.0,R,5.0,N,A", s));    // space
   TEST_ASSERT_FALSE(parseBody("IIMWV,.,R,5.0,N,A", s));         // no digits
-  TEST_ASSERT_FALSE(parseBody("IIMWV,360.0,R,1.0,N,A", s));     // out of range
+  TEST_ASSERT_FALSE(parseBody("IIMWV,360.1,R,1.0,N,A", s));     // out of range
   TEST_ASSERT_FALSE(parseBody("IIMWV,-5.0,R,1.0,N,A", s));      // negative angle
   TEST_ASSERT_FALSE(parseBody("IIMWV,225.0,R,-1.0,N,A", s));    // negative speed
   TEST_ASSERT_FALSE(parseBody("IIMWV,225.0,R,000.0,N", s));     // missing field
