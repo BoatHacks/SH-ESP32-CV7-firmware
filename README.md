@@ -1,6 +1,6 @@
 # SH-ESP32-CV7 firmware
 
-Firmware for the Hat Labs Sailor Hat (SH-ESP32) that reads an LCJ Capteurs CV7 ultrasonic wind sensor (NMEA 0183, IIMWV and WIXDR) and republishes apparent wind and air temperature on NMEA 2000 (PGN 130306, PGN 130312) and SignalK. See [SPEC.md](SPEC.md) and [ARCHITECTURE.md](ARCHITECTURE.md).
+Firmware for the Hat Labs Sailor Hat (SH-ESP32) that reads an LCJ Capteurs CV7 ultrasonic wind sensor (NMEA 0183, IIMWV and WIXDR) and republishes apparent wind and air temperature on NMEA 2000 (PGN 130306, PGN 130312) and SignalK. See the [User Manual](USER_MANUAL.md) for installing and using it, and [SPEC.md](SPEC.md) and [ARCHITECTURE.md](ARCHITECTURE.md) for the design.
 
 Status: the firmware compiles and the parser and conditioning code have native unit tests. It has not been verified on hardware, including whether OPTO_IN receives the CV7 current loop (SPEC section 13).
 
