@@ -2,6 +2,8 @@
 
 #include <cstdlib>
 
+#include "SignalKPath.h"
+
 namespace cv7 {
 
 Settings::Settings() : FileSystemSaveable("/cv7/settings") {
@@ -20,7 +22,8 @@ Settings::Settings() : FileSystemSaveable("/cv7/settings") {
        "sensor's 500 ms.",
        Type::Int, &outputIntervalMs, (float)kMinIntervalMs, (float)kMaxIntervalMs},
       {"temp_path", "Temperature SignalK path",
-       "SignalK path for the air temperature (kelvin). Takes effect after save.",
+       "SignalK path for the air temperature (kelvin), dot separated "
+       "letters, digits and underscore. Takes effect after save.",
        Type::Text, &tempPath, 0, 0},
       {"n2k_instance", "N2K temperature instance",
        "Instance field of PGN 130312.", Type::Int, &n2kInstance, 0.0f, 252.0f},
@@ -66,8 +69,9 @@ bool Settings::setFromString(const char* key, const String& value, String& err) 
   }
   std::lock_guard<std::mutex> lock(mutex_);
   if (f->type == Type::Text) {
-    if (value.length() == 0 || value.length() > 120) {
-      err = "length must be 1..120";
+    // The only text setting is a SignalK path.
+    if (const char* why = signalKPathError(value.c_str())) {
+      err = why;
       return false;
     }
     *(String*)f->ptr = value;
