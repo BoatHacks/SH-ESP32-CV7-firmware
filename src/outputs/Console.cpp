@@ -79,13 +79,14 @@ void Console::handle(char* line) {
 
 void Console::echoRaw(const char* line, uint32_t nowMs) {
   if (!raw_) return;
-  if (echoBudget_.allow(nowMs)) {
+  bool allowed = echoBudget_.allow(nowMs);
+  // One note per window that dropped lines, so a truncated echo is not
+  // mistaken for a quiet sensor.
+  uint32_t drops = echoBudget_.takeWindowDrops();
+  if (drops > 0) Serial.printf("rx: (%u lines not shown)\n", (unsigned)drops);
+  if (allowed) {
     Serial.print("rx: ");
     Serial.println(line);
-  } else if (echoBudget_.dropped() != reportedDrops_ && (nowMs & 0x3FF) < 100) {
-    // Occasional note so a truncated echo is not mistaken for a quiet sensor.
-    reportedDrops_ = echoBudget_.dropped();
-    Serial.printf("rx: (%u lines not shown)\n", (unsigned)reportedDrops_);
   }
 }
 

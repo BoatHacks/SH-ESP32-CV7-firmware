@@ -214,6 +214,47 @@ void test_line_assembler_overflow_at_exact_boundary() {
   TEST_ASSERT_EQUAL_INT(0, (int)lines.size());
 }
 
+void test_echo_budget_reports_drops_when_window_rolls() {
+  EchoBudget b(2, 1000);
+  for (int i = 0; i < 5; i++) {
+    b.allow(100 + i);
+    TEST_ASSERT_EQUAL_UINT32(0, b.takeWindowDrops());  // window still open
+  }
+  TEST_ASSERT_EQUAL_UINT32(3, b.dropped());
+  TEST_ASSERT_TRUE(b.allow(1100));  // next window opens
+  TEST_ASSERT_EQUAL_UINT32(3, b.takeWindowDrops());
+  TEST_ASSERT_EQUAL_UINT32(0, b.takeWindowDrops());  // reported once
+}
+
+void test_echo_budget_no_report_without_drops() {
+  EchoBudget b(8, 1000);
+  b.allow(0);
+  b.allow(500);
+  b.allow(1500);
+  b.allow(2600);
+  TEST_ASSERT_EQUAL_UINT32(0, b.takeWindowDrops());
+}
+
+void test_echo_budget_one_report_per_truncated_window_at_500ms_cadence() {
+  // CV7 cadence: a line every 500 ms, budget of 1 per 1000 ms window.
+  EchoBudget b(1, 1000);
+  int notes = 0;
+  for (uint32_t t = 0; t < 10000; t += 500) {
+    b.allow(t);
+    if (b.takeWindowDrops() > 0) notes++;
+  }
+  // 10 windows, each drops one line; the last one is not yet rolled over.
+  TEST_ASSERT_EQUAL_INT(9, notes);
+}
+
+void test_echo_budget_drops_across_millis_wrap() {
+  EchoBudget b(1, 1000);
+  b.allow(0xFFFFFF00u);
+  b.allow(0xFFFFFF80u);  // dropped
+  TEST_ASSERT_TRUE(b.allow(0x300));  // rolls over across the wrap
+  TEST_ASSERT_EQUAL_UINT32(1, b.takeWindowDrops());
+}
+
 int main() {
   UNITY_BEGIN();
   RUN_TEST(test_parse_ex_results);
@@ -227,6 +268,10 @@ int main() {
   RUN_TEST(test_n2k_sent_counters);
   RUN_TEST(test_echo_budget_caps_per_window);
   RUN_TEST(test_echo_budget_wrap);
+  RUN_TEST(test_echo_budget_reports_drops_when_window_rolls);
+  RUN_TEST(test_echo_budget_no_report_without_drops);
+  RUN_TEST(test_echo_budget_one_report_per_truncated_window_at_500ms_cadence);
+  RUN_TEST(test_echo_budget_drops_across_millis_wrap);
   RUN_TEST(test_line_assembler_basic);
   RUN_TEST(test_line_assembler_max_length_line_ok);
   RUN_TEST(test_line_assembler_overlong_discards_tail);

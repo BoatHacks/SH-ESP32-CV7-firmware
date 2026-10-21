@@ -28,7 +28,6 @@ class Console {
   diagnostics::Diagnostics& diag_;
   diagnostics::EchoBudget echoBudget_;
   bool raw_ = false;
-  uint32_t reportedDrops_ = 0;
   diagnostics::LineAssembler asm_;
 };
 
