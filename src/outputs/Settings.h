@@ -2,6 +2,9 @@
 
 #include <Arduino.h>
 
+#include <atomic>
+#include <mutex>
+
 #include "sensesp/system/saveable.h"
 #include "sensesp/ui/config_item.h"
 
@@ -39,7 +42,23 @@ class Settings : public sensesp::FileSystemSaveable {
   bool rxInvert = false;
 
   // Incremented whenever a value changes, so consumers can re-apply.
-  uint32_t revision() const { return revision_; }
+  uint32_t revision() const { return revision_.load(); }
+
+  // Consistent copy of all values, taken under the lock. Other tasks must read
+  // settings through this instead of the public members, because the web UI
+  // (httpd task) writes them while the event loop task reads them.
+  struct Snapshot {
+    float angleOffsetDeg;
+    float speedScale;
+    float dampingSeconds;
+    int outputIntervalMs;
+    String tempPath;
+    int n2kInstance;
+    int baud;
+    bool rxInvert;
+    uint32_t revision;
+  };
+  Snapshot snapshot() const;
 
   static constexpr size_t kFieldCount = 8;
   const Field* fields() const { return fields_; }
@@ -56,7 +75,9 @@ class Settings : public sensesp::FileSystemSaveable {
 
  private:
   Field fields_[kFieldCount];
-  uint32_t revision_ = 0;
+  std::atomic<uint32_t> revision_{0};
+  // Guards every value field (including the tempPath String) and revision_ updates.
+  mutable std::mutex mutex_;
 };
 
 }  // namespace cv7

@@ -120,8 +120,9 @@ void Console::printStatus() {
   auto ws = sensesp::sensesp_app ? sensesp::sensesp_app->get_ws_client() : nullptr;
   Serial.printf("signalk_connected: %s\n", ws && ws->is_connected() ? "yes" : "no");
   Serial.printf("wifi_connected: %s\n", WiFi.status() == WL_CONNECTED ? "yes" : "no");
-  Serial.printf("baud: %d\n", settings_.baud);
-  Serial.printf("rx_invert: %s\n", settings_.rxInvert ? "yes" : "no");
+  const Settings::Snapshot cfg = settings_.snapshot();
+  Serial.printf("baud: %d\n", cfg.baud);
+  Serial.printf("rx_invert: %s\n", cfg.rxInvert ? "yes" : "no");
 }
 
 }  // namespace cv7
