@@ -11,6 +11,9 @@ All notable changes to this project are documented here. The format follows
 - IIMWV angles of exactly 360 (for example 360.0 from rounding 359.95) are
   now accepted and normalised to 0 instead of dropping the sentence.
   Angles above 360 are still rejected.
+- PGN 130312 (temperature) is now sent with SID 0xFF (not available) instead of
+  the wind SID, so the temperature and wind PGNs no longer imply a shared
+  sample. Built and unit tested only, not verified on hardware.
 
 ## [0.1.0]
 
