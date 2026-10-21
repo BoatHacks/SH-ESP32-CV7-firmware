@@ -73,36 +73,47 @@ bool checksumValid(const char* line) {
 }
 
 bool parse(const char* line, Sentence& out) {
-  if (!line || std::strlen(line) > kMaxLine || !checksumValid(line)) return false;
+  return parseEx(line, out) == ParseResult::Ok;
+}
+
+ParseResult parseEx(const char* line, Sentence& out) {
+  constexpr ParseResult kOk = ParseResult::Ok, kBad = ParseResult::Rejected;
+  if (!line || std::strlen(line) > kMaxLine) return kBad;
+  if (!checksumValid(line)) {
+    // A line that never looked like "$...*HH" is malformed, not a checksum failure.
+    const char* star = line[0] == '$' ? std::strchr(line, '*') : nullptr;
+    bool framed = star && hexVal(star[1]) >= 0 && hexVal(star[2]) >= 0 && star[3] == '\0';
+    return framed ? ParseResult::BadChecksum : kBad;
+  }
   const char* body = line + 1;
   size_t len = static_cast<size_t>(std::strchr(line, '*') - body);
 
   Field f[kMaxFields + 1];
   size_t n = split(body, len, f);
-  if (n > kMaxFields || f[0].n != 5) return false;
+  if (n > kMaxFields || f[0].n != 5) return kBad;
   const char* id = f[0].p;
 
   if (std::memcmp(id, "IIMWV", 5) == 0) {
     // angle, reference, speed, unit, status
-    if (n != 6 || !f[2].is('R') || !f[4].is('N') || !f[5].is('A')) return false;
+    if (n != 6 || !f[2].is('R') || !f[4].is('N') || !f[5].is('A')) return kBad;
     float angle, speed;
-    if (!parseNumber(f[1].p, f[1].n, angle) || !parseNumber(f[3].p, f[3].n, speed)) return false;
-    if (angle < 0 || angle >= 360 || speed < 0) return false;
+    if (!parseNumber(f[1].p, f[1].n, angle) || !parseNumber(f[3].p, f[3].n, speed)) return kBad;
+    if (angle < 0 || angle >= 360 || speed < 0) return kBad;
     out.type = SentenceType::Wind;
     out.angleDeg = angle;
     out.speedKnots = speed;
-    return true;
+    return kOk;
   }
   if (std::memcmp(id, "WIXDR", 5) == 0) {
     // type, value, unit, name (name and further groups ignored)
-    if (n < 4 || !f[1].is('C') || !f[3].is('C')) return false;
+    if (n < 4 || !f[1].is('C') || !f[3].is('C')) return kBad;
     float temp;
-    if (!parseNumber(f[2].p, f[2].n, temp)) return false;
+    if (!parseNumber(f[2].p, f[2].n, temp)) return kBad;
     out.type = SentenceType::Temperature;
     out.temperatureC = temp;
-    return true;
+    return kOk;
   }
-  return false;
+  return kBad;
 }
 
 bool LineReader::feed(char c) {

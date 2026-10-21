@@ -59,7 +59,7 @@ See SPEC.md section 4. Internal readings use SI units (radians, m/s, kelvin). In
 ## 5. Integration Points
 
 - **CV7**: NMEA 0183 over the opto-isolated input (SPEC section 5).
-- **NMEA 2000 bus**: through the board's isolated CAN transceiver.
+- **NMEA 2000 bus**: through the board's isolated CAN transceiver. The bus also supplies the board's power (12 V and ground from the drop cable); the CV7 is powered from the same supply.
 - **SignalK server**: WebSocket delta client, token authentication.
 
 ## 6. Security Considerations

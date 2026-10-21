@@ -22,6 +22,13 @@ bool checksumValid(const char* line);
 // returns false and leaves `out` untouched.
 bool parse(const char* line, Sentence& out);
 
+// Why a line was not accepted, for diagnostics.
+enum class ParseResult { Ok, BadChecksum, Rejected };
+
+// Same decoding as parse(), but tells a checksum failure apart from every
+// other rejection (framing, unsupported sentence, bad field, overlong line).
+ParseResult parseEx(const char* line, Sentence& out);
+
 // Assembles bytes from the serial port into lines. Lines longer than the
 // internal buffer (82 chars) are discarded.
 class LineReader {

@@ -11,8 +11,9 @@ class N2kOutput {
   void begin();
   // Services the CAN stack (address claim, requests); call often.
   void poll();
-  void sendWind(float angleRad, float speedMps);
-  void sendTemperature(float kelvin, uint8_t instance);
+  // Return true if the frame was queued for the bus.
+  bool sendWind(float angleRad, float speedMps);
+  bool sendTemperature(float kelvin, uint8_t instance);
 
  private:
   uint8_t sid_ = 0;

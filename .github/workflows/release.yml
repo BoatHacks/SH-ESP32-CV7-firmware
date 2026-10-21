@@ -13,15 +13,54 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # The firmware derives its version from `git describe`, which needs
+          # the full history and the tags.
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install platformio==6.1.18
+      - name: Install tools
+        # esptool 4.5.1 is the version PlatformIO's espressif32@6.9.0 uses.
+        run: pip install platformio==6.1.18 esptool==4.5.1
+      - name: Native unit tests
+        run: pio test -e native
       - name: Build firmware
         run: pio run -e sh-esp32
-      - name: Attach firmware.bin to the release
+      - name: Create release assets
+        run: |
+          set -euo pipefail
+          VERSION="${GITHUB_REF_NAME#v}"
+          B=.pio/build/sh-esp32
+          BOOT_APP0=$(ls ~/.platformio/packages/framework-arduinoespressif32*/tools/partitions/boot_app0.bin | head -n 1)
+          mkdir -p dist
+          # Offsets and flash parameters are what `pio run -t upload -v` uses
+          # for this board (esp32dev) and partitions (min_spiffs.csv).
+          esptool.py --chip esp32 merge_bin \
+            --flash_mode dio --flash_freq 40m --flash_size 4MB \
+            -o "dist/sh-esp32-cv7-${VERSION}-merged.bin" \
+            0x1000 "$B/bootloader.bin" \
+            0x8000 "$B/partitions.bin" \
+            0xe000 "$BOOT_APP0" \
+            0x10000 "$B/firmware.bin"
+          cp "$B/firmware.bin" "dist/sh-esp32-cv7-${VERSION}-ota.bin"
+          # Check that the app image sits at 0x10000 inside the merged image.
+          python3 - "dist/sh-esp32-cv7-${VERSION}-merged.bin" "$B/firmware.bin" <<'PY'
+          import sys
+          merged = open(sys.argv[1], "rb").read()
+          app = open(sys.argv[2], "rb").read()
+          assert merged[0x10000:0x10000 + len(app)] == app, "app image not at 0x10000"
+          assert merged[0x1000] == 0xE9 and merged[0x10000] == 0xE9, "bad image magic"
+          PY
+          (cd dist && sha256sum *.bin > SHA256SUMS)
+      - name: Publish release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1 || gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --generate-notes
-          gh release upload "$GITHUB_REF_NAME" .pio/build/sh-esp32/firmware.bin --clobber
+          set -euo pipefail
+          FLAGS=""
+          # Tags with a hyphen suffix (v0.1.0-rc1) are prereleases.
+          case "$GITHUB_REF_NAME" in *-*) FLAGS="--prerelease" ;; esac
+          gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1 || \
+            gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --generate-notes $FLAGS
+          gh release upload "$GITHUB_REF_NAME" dist/*.bin dist/SHA256SUMS --clobber

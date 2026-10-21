@@ -5,12 +5,15 @@
 
 #include <cmath>
 
+#include "Version.h"
 #include "conditioning/Conditioning.h"
+#include "diagnostics/Diagnostics.h"
 #include "nmea0183/Nmea0183.h"
 #include "outputs/Console.h"
 #include "outputs/N2kOutput.h"
 #include "outputs/Settings.h"
 #include "outputs/SignalKOutput.h"
+#include "sensesp/ui/status_page_item.h"
 #include "sensesp_app_builder.h"
 
 using namespace sensesp;
@@ -37,6 +40,7 @@ cv7::Settings* settings;
 cv7::N2kOutput n2k;
 cv7::SignalKOutput* signalk;
 cv7::Console* console;
+diagnostics::Diagnostics diag;
 
 nmea0183::LineReader reader;
 conditioning::WindConditioner conditioner;
@@ -87,9 +91,15 @@ void onSentence(const nmea0183::Sentence& s, uint32_t now) {
 void pollSensor() {
   uint32_t now = millis();
   while (Serial2.available() > 0) {
-    if (!reader.feed((char)Serial2.read())) continue;
+    char c = (char)Serial2.read();
+    diag.addBytes(1);
+    if (!reader.feed(c)) continue;
+    diag.onLine();
+    console->echoRaw(reader.line(), now);
     nmea0183::Sentence s;
-    if (nmea0183::parse(reader.line(), s)) onSentence(s, now);
+    nmea0183::ParseResult r = nmea0183::parseEx(reader.line(), s);
+    diag.onParse(r, s, now);
+    if (r == nmea0183::ParseResult::Ok) onSentence(s, now);
   }
 }
 
@@ -98,12 +108,12 @@ void pollSensor() {
 void publish() {
   uint32_t now = millis();
   if (windPending && windFresh.fresh(now) && windLimiter.allow(now)) {
-    n2k.sendWind(wind.angleRad, wind.speedMps);
+    if (n2k.sendWind(wind.angleRad, wind.speedMps)) diag.onN2kWindSent();
     signalk->sendWind(wind.angleRad, wind.speedMps);
     windPending = false;
   }
   if (tempPending && tempFresh.fresh(now) && tempLimiter.allow(now)) {
-    n2k.sendTemperature(tempK, (uint8_t)settings->n2kInstance);
+    if (n2k.sendTemperature(tempK, (uint8_t)settings->n2kInstance)) diag.onN2kTempSent();
     signalk->sendTemperature(tempK);
     tempPending = false;
   }
@@ -113,12 +123,16 @@ void publish() {
 
 void setup() {
   SetupLogging();
+  Serial.printf("SH-ESP32-CV7 firmware %s\n", CV7_FW_VERSION);
 
   SensESPAppBuilder builder;
   sensesp_app = builder.set_hostname("sh-esp32-cv7")
                     ->set_admin_user(CV7_ADMIN_USER, CV7_ADMIN_PASSWORD)
                     ->enable_ota(CV7_OTA_PASSWORD)
                     ->get_app();
+
+  // Read-only entry on the web UI status page.
+  new StatusPageItem<String>("Firmware version", CV7_FW_VERSION, "Software", 3350);
 
   settings = new cv7::Settings();
   ConfigItem(std::shared_ptr<cv7::Settings>(settings))
@@ -129,7 +143,7 @@ void setup() {
       ->set_sort_order(100);
 
   signalk = new cv7::SignalKOutput(settings->tempPath);
-  console = new cv7::Console(*settings);
+  console = new cv7::Console(*settings, diag);
 
   windFresh.setTimeoutMs(kFreshMs);
   tempFresh.setTimeoutMs(kFreshMs);
