@@ -6,6 +6,12 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- IIMWV angles of exactly 360 (for example 360.0 from rounding 359.95) are
+  now accepted and normalised to 0 instead of dropping the sentence.
+  Angles above 360 are still rejected.
+
 ## [0.1.0]
 
 First release. **Untested on hardware.** The firmware builds, and the NMEA

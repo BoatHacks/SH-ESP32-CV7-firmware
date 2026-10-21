@@ -98,7 +98,10 @@ ParseResult parseEx(const char* line, Sentence& out) {
     if (n != 6 || !f[2].is('R') || !f[4].is('N') || !f[5].is('A')) return kBad;
     float angle, speed;
     if (!parseNumber(f[1].p, f[1].n, angle) || !parseNumber(f[3].p, f[3].n, speed)) return kBad;
-    if (angle < 0 || angle >= 360 || speed < 0) return kBad;
+    // 360.0 can appear when the sensor rounds a value just below north up;
+    // accept it and fold it to 0. Anything above 360.0 is still rejected.
+    if (angle < 0 || angle > 360 || speed < 0) return kBad;
+    if (angle == 360) angle = 0;
     out.type = SentenceType::Wind;
     out.angleDeg = angle;
     out.speedKnots = speed;
