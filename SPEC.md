@@ -90,9 +90,11 @@ Configuration survives restart (flash). Sensor readings are ephemeral.
 - **Output rate is firmware-side**: the CV7 has no documented serial command for its output rate, so the user-configurable rate is applied in the firmware (default: sensor rate), which also lets it be lowered to reduce bus load. Changing the sensor's own rate is not possible; the high-rate CV7-C or CV7-HR-OEM variants are separate hardware.
 - **PGN 130312 for temperature**: current Temperature PGN, as used by the CV7 WindyPlug V3. PGN 130311 is deprecated.
 - **Standard CV7 / CV7-V targeted**: 4800 baud, 500 ms sentence interval. Other variants (CV7-C, CV7-HR-OEM) are not covered by the MVP.
+- **No RX inversion by default**: the Sailor Hat's opto input idles high (LED off, pull-up) and goes low when current flows, which matches UART idle and start bit polarity for NMEA 0183. The `rx_invert` setting stays available as a fallback.
 - **Default credentials**: the web UI and OTA ship with documented default passwords. Boat WiFi is assumed to be secure, and a working out-of-the-box firmware matters more for download-and-flash users than hardening against a LAN attacker. Changing them is a build-time option.
 - **Configurable temperature path**: the CV7 may be mounted somewhere other than outside (or a user may want a different instance), so the SignalK path is a setting, not a constant.
 
 ## 13. Open Questions
 
-- Whether the SH-ESP32's OPTO_IN (GPIO 35) reliably receives the CV7's 4 mA loop output at 4800 baud, and with which polarity (the firmware may need to invert the UART RX signal). Verify on hardware; Hat Labs documents the input only as "should be able to" handle slow single-sided NMEA 0183.
+- Whether the CV7's 4 mA current loop can drive OPTO_IN. Per the Sailor Hat schematic, the input is a 2.2k series resistor into an EL3H7 optocoupler LED, and Hat Labs documents it as working from about 2.5 V, so it needs well under 4 mA. If the CV7 output is a true current source, it needs roughly 10 V of compliance to push 4 mA through that resistor, and the CV7 documents no compliance figure. Settle with a measurement, or a question to LCJ.
+- Wire polarity at the CV7 end. The manual labels yellow "TX+" and green "RX-", so yellow to ISO_IN and green to ISO_GND is the expected wiring. Verify on hardware.
