@@ -2,10 +2,12 @@
 
 #include <cstdio>
 #include <string>
+#include <vector>
 
 // platformio.ini has no test_build_src, so compile the units under test directly.
 #include "diagnostics/Diagnostics.cpp"
 #include "diagnostics/Diagnostics.h"
+#include "diagnostics/LineAssembler.h"
 #include "nmea0183/Nmea0183.cpp"
 
 using namespace diagnostics;
@@ -147,6 +149,71 @@ void test_echo_budget_wrap() {
   TEST_ASSERT_TRUE(b.allow(0x300));  // 0x400 ms later across the wrap
 }
 
+// Feeds a string, returns the lines seen and counts overflows.
+static void feedAll(LineAssembler& a, const std::string& in,
+                    std::vector<std::string>& lines, int& overflows) {
+  for (char c : in) {
+    auto r = a.feed(c);
+    if (r == LineAssembler::Result::Line) lines.push_back(a.line());
+    else if (r == LineAssembler::Result::Overflow) overflows++;
+  }
+}
+
+void test_line_assembler_basic() {
+  LineAssembler a;
+  std::vector<std::string> lines;
+  int ov = 0;
+  feedAll(a, "save\r\n\nget x\n", lines, ov);
+  TEST_ASSERT_EQUAL_INT(0, ov);
+  TEST_ASSERT_EQUAL_INT(2, (int)lines.size());
+  TEST_ASSERT_EQUAL_STRING("save", lines[0].c_str());
+  TEST_ASSERT_EQUAL_STRING("get x", lines[1].c_str());
+}
+
+void test_line_assembler_max_length_line_ok() {
+  LineAssembler a;
+  std::vector<std::string> lines;
+  int ov = 0;
+  std::string l(LineAssembler::kMax - 1, 'a');
+  feedAll(a, l + "\n", lines, ov);
+  TEST_ASSERT_EQUAL_INT(0, ov);
+  TEST_ASSERT_EQUAL_INT(1, (int)lines.size());
+  TEST_ASSERT_EQUAL_STRING(l.c_str(), lines[0].c_str());
+}
+
+void test_line_assembler_overlong_discards_tail() {
+  LineAssembler a;
+  std::vector<std::string> lines;
+  int ov = 0;
+  // The tail "save" would have run as a command with the old behaviour.
+  std::string l(LineAssembler::kMax + 50, 'a');
+  l.replace(l.size() - 4, 4, "save");
+  feedAll(a, l + "\r\n", lines, ov);
+  TEST_ASSERT_EQUAL_INT(1, ov);
+  TEST_ASSERT_EQUAL_INT(0, (int)lines.size());
+}
+
+void test_line_assembler_recovers_after_overlong() {
+  LineAssembler a;
+  std::vector<std::string> lines;
+  int ov = 0;
+  std::string l(LineAssembler::kMax * 3, 'x');
+  feedAll(a, l + "\nstatus\n", lines, ov);
+  TEST_ASSERT_EQUAL_INT(1, ov);
+  TEST_ASSERT_EQUAL_INT(1, (int)lines.size());
+  TEST_ASSERT_EQUAL_STRING("status", lines[0].c_str());
+}
+
+void test_line_assembler_overflow_at_exact_boundary() {
+  LineAssembler a;
+  std::vector<std::string> lines;
+  int ov = 0;
+  // kMax chars is one too many, kMax - 1 is the longest accepted.
+  feedAll(a, std::string(LineAssembler::kMax, 'b') + "\n", lines, ov);
+  TEST_ASSERT_EQUAL_INT(1, ov);
+  TEST_ASSERT_EQUAL_INT(0, (int)lines.size());
+}
+
 int main() {
   UNITY_BEGIN();
   RUN_TEST(test_parse_ex_results);
@@ -160,5 +227,10 @@ int main() {
   RUN_TEST(test_n2k_sent_counters);
   RUN_TEST(test_echo_budget_caps_per_window);
   RUN_TEST(test_echo_budget_wrap);
+  RUN_TEST(test_line_assembler_basic);
+  RUN_TEST(test_line_assembler_max_length_line_ok);
+  RUN_TEST(test_line_assembler_overlong_discards_tail);
+  RUN_TEST(test_line_assembler_recovers_after_overlong);
+  RUN_TEST(test_line_assembler_overflow_at_exact_boundary);
   return UNITY_END();
 }

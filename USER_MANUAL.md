@@ -219,6 +219,9 @@ console takes these commands:
 The keys are `angle_offset`, `speed_scale`, `damping`, `output_interval`,
 `temp_path`, `n2k_instance`, `baud` and `rx_invert`.
 
+A line longer than 159 characters is ignored as a whole and answered with
+`error: line too long, ignored`; nothing from it is run as a command.
+
 ### 7.4 If the sensor goes quiet
 
 If the board doesn't receive a valid reading for 3 seconds, it stops

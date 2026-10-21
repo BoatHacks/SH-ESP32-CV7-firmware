@@ -4,6 +4,7 @@
 
 #include "Settings.h"
 #include "diagnostics/Diagnostics.h"
+#include "diagnostics/LineAssembler.h"
 
 namespace cv7 {
 
@@ -28,8 +29,7 @@ class Console {
   diagnostics::EchoBudget echoBudget_;
   bool raw_ = false;
   uint32_t reportedDrops_ = 0;
-  char buf_[160];
-  size_t len_ = 0;
+  diagnostics::LineAssembler asm_;
 };
 
 }  // namespace cv7

@@ -9,17 +9,15 @@ namespace cv7 {
 
 void Console::poll() {
   while (Serial.available() > 0) {
-    char c = (char)Serial.read();
-    if (c == '\r' || c == '\n') {
-      if (len_ > 0) {
-        buf_[len_] = '\0';
-        handle(buf_);
-        len_ = 0;
-      }
-    } else if (len_ < sizeof(buf_) - 1) {
-      buf_[len_++] = c;
-    } else {
-      len_ = 0;  // overlong line, discard
+    switch (asm_.feed((char)Serial.read())) {
+      case diagnostics::LineAssembler::Result::Line:
+        handle(asm_.line());
+        break;
+      case diagnostics::LineAssembler::Result::Overflow:
+        Serial.println("error: line too long, ignored");
+        break;
+      default:
+        break;
     }
   }
 }
