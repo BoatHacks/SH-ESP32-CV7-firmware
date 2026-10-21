@@ -64,7 +64,7 @@ See SPEC.md section 4. Internal readings use SI units (radians, m/s, kelvin). In
 
 ## 6. Security Considerations
 
-The device sits on the boat LAN. The SensESP web UI is the main attack surface, so the build keeps its authentication enabled and the SignalK token is stored in flash and never logged. Input from the serial line is length-limited and checksum-validated before parsing.
+The device sits on the boat LAN, which is assumed to be secure. The SensESP web UI and OTA are the attack surface. Authentication stays enabled, but the firmware ships with documented default credentials so download-and-flash users get a working device without a build step; users who want different credentials override them at build time (`CV7_ADMIN_PASSWORD`, `CV7_OTA_PASSWORD`). The SignalK token is stored in flash and never logged. Input from the serial line is length-limited and checksum-validated before parsing.
 
 ## 7. File Structure
 

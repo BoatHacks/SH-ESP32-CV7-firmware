@@ -90,6 +90,7 @@ Configuration survives restart (flash). Sensor readings are ephemeral.
 - **Output rate is firmware-side**: the CV7 has no documented serial command for its output rate, so the user-configurable rate is applied in the firmware (default: sensor rate), which also lets it be lowered to reduce bus load. Changing the sensor's own rate is not possible; the high-rate CV7-C or CV7-HR-OEM variants are separate hardware.
 - **PGN 130312 for temperature**: current Temperature PGN, as used by the CV7 WindyPlug V3. PGN 130311 is deprecated.
 - **Standard CV7 / CV7-V targeted**: 4800 baud, 500 ms sentence interval. Other variants (CV7-C, CV7-HR-OEM) are not covered by the MVP.
+- **Default credentials**: the web UI and OTA ship with documented default passwords. Boat WiFi is assumed to be secure, and a working out-of-the-box firmware matters more for download-and-flash users than hardening against a LAN attacker. Changing them is a build-time option.
 - **Configurable temperature path**: the CV7 may be mounted somewhere other than outside (or a user may want a different instance), so the SignalK path is a setting, not a constant.
 
 ## 13. Open Questions
