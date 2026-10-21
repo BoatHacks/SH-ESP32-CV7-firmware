@@ -166,7 +166,7 @@ Settings are saved to flash and survive a restart.
 | Wind speed scale factor | 1.0 | Multiplied with the measured speed. Range 0.1 to 10. |
 | Damping time constant (s) | 0 | Smooths angle and speed. 0 turns smoothing off. Range 0 to 600. |
 | Output interval (ms) | 500 | Time between published readings, for both NMEA 2000 and SignalK. 500 is as fast as the CV7 sends; higher values reduce bus traffic. Range 500 to 60000. |
-| Temperature SignalK path | `environment.outside.temperature` | Where the air temperature goes in SignalK, in kelvin. Takes effect after saving. |
+| Temperature SignalK path | `environment.outside.temperature` | Where the air temperature goes in SignalK, in kelvin. Dot separated names made of letters, digits and underscore, no spaces and no empty parts (for example `environment.inside.temperature`); anything else is rejected with an error. Takes effect after saving. |
 | N2K temperature instance | 0 | The instance number in the NMEA 2000 temperature message (PGN 130312). Range 0 to 252. |
 | Sensor baud rate | 4800 | Baud rate of the sensor input. Leave at 4800 for the standard CV7. |
 | Invert RX signal | off | Inverts the sensor input. Only for troubleshooting (section 8). |

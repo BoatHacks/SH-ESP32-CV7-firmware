@@ -16,6 +16,12 @@ All notable changes to this project are documented here. The format follows
   sample. Built and unit tested only, not verified on hardware.
 - Serial console: a line longer than 159 characters is now ignored as a whole
   with one error message. Before, its tail was run as a separate command.
+- The temperature SignalK path is now validated in the web UI and the serial
+  console: dot separated names of letters, digits and underscore, no spaces,
+  no leading, trailing or doubled dot, at most 120 characters. Before, any
+  text up to 120 characters was accepted and the SignalK server then ignored
+  the deltas silently. A saved path that does not pass is ignored on load and
+  the default is kept.
 
 ## [0.1.0]
 
