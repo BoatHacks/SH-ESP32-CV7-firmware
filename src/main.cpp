@@ -54,24 +54,26 @@ bool windPending = false, tempPending = false;
 uint32_t appliedRevision = 0xFFFFFFFF;
 int appliedBaud = 0;
 bool appliedInvert = false;
+uint8_t appliedN2kInstance = 0;
 
 // Pushes changed settings into the pipeline; cheap when nothing changed.
 void applySettings() {
   if (appliedRevision == settings->revision()) return;
-  appliedRevision = settings->revision();
+  const cv7::Settings::Snapshot cfg = settings->snapshot();
+  appliedRevision = cfg.revision;
+  appliedN2kInstance = (uint8_t)cfg.n2kInstance;
 
-  conditioner.configure({settings->angleOffsetDeg, settings->speedScale,
-                         settings->dampingSeconds});
-  uint32_t interval = (uint32_t)max(settings->outputIntervalMs, cv7::kMinIntervalMs);
+  conditioner.configure({cfg.angleOffsetDeg, cfg.speedScale, cfg.dampingSeconds});
+  uint32_t interval = (uint32_t)max(cfg.outputIntervalMs, cv7::kMinIntervalMs);
   windLimiter.setIntervalMs(interval);
   tempLimiter.setIntervalMs(interval);
-  signalk->setTempPath(settings->tempPath);
+  signalk->setTempPath(cfg.tempPath);
 
-  if (settings->baud != appliedBaud || settings->rxInvert != appliedInvert) {
+  if (cfg.baud != appliedBaud || cfg.rxInvert != appliedInvert) {
     Serial2.end();
-    Serial2.begin(settings->baud, SERIAL_8N1, kOptoInPin, -1, settings->rxInvert);
-    appliedBaud = settings->baud;
-    appliedInvert = settings->rxInvert;
+    Serial2.begin(cfg.baud, SERIAL_8N1, kOptoInPin, -1, cfg.rxInvert);
+    appliedBaud = cfg.baud;
+    appliedInvert = cfg.rxInvert;
     reader = nmea0183::LineReader();
   }
 }
@@ -113,7 +115,7 @@ void publish() {
     windPending = false;
   }
   if (tempPending && tempFresh.fresh(now) && tempLimiter.allow(now)) {
-    if (n2k.sendTemperature(tempK, (uint8_t)settings->n2kInstance)) diag.onN2kTempSent();
+    if (n2k.sendTemperature(tempK, appliedN2kInstance)) diag.onN2kTempSent();
     signalk->sendTemperature(tempK);
     tempPending = false;
   }
@@ -142,7 +144,7 @@ void setup() {
           "sensor serial input.")
       ->set_sort_order(100);
 
-  signalk = new cv7::SignalKOutput(settings->tempPath);
+  signalk = new cv7::SignalKOutput(settings->snapshot().tempPath);
   console = new cv7::Console(*settings, diag);
 
   windFresh.setTimeoutMs(kFreshMs);

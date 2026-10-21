@@ -41,7 +41,14 @@ const Settings::Field* Settings::find(const char* key) const {
   return nullptr;
 }
 
+Settings::Snapshot Settings::snapshot() const {
+  std::lock_guard<std::mutex> lock(mutex_);
+  return {angleOffsetDeg, speedScale, dampingSeconds, outputIntervalMs, tempPath,
+          n2kInstance,    baud,       rxInvert,       revision_.load()};
+}
+
 String Settings::getAsString(const Field& f) const {
+  std::lock_guard<std::mutex> lock(mutex_);
   switch (f.type) {
     case Type::Float: return String(*(float*)f.ptr, 3);
     case Type::Int: return String(*(int*)f.ptr);
@@ -57,6 +64,7 @@ bool Settings::setFromString(const char* key, const String& value, String& err) 
     err = "unknown key";
     return false;
   }
+  std::lock_guard<std::mutex> lock(mutex_);
   if (f->type == Type::Text) {
     if (value.length() == 0 || value.length() > 120) {
       err = "length must be 1..120";
@@ -93,6 +101,7 @@ bool Settings::setFromString(const char* key, const String& value, String& err) 
 }
 
 bool Settings::to_json(JsonObject& root) {
+  std::lock_guard<std::mutex> lock(mutex_);
   for (const auto& f : fields_) {
     switch (f.type) {
       case Type::Float: root[f.key] = *(float*)f.ptr; break;
