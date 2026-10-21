@@ -214,7 +214,9 @@ console takes these commands:
   received yet show `n/a`.
 - `status reset`: set the counters to zero (the last readings are kept)
 - `raw [on|off]`: echo the received sentences on the console (at most 8
-  lines per second); `raw` alone shows whether it is on
+  lines per second); `raw` alone shows whether it is on. Lines over that
+  limit are not shown; each second that dropped some prints
+  `rx: (N lines not shown)`.
 
 The keys are `angle_offset`, `speed_scale`, `damping`, `output_interval`,
 `temp_path`, `n2k_instance`, `baud` and `rx_invert`.

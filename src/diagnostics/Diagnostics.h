@@ -48,17 +48,27 @@ class Diagnostics {
 };
 
 // Allows at most `maxLines` per `windowMs`, so the raw echo cannot flood the
-// console. Lines over budget are counted in dropped().
+// console. Lines over budget are counted in dropped(). When a window rolls
+// over, the number of lines dropped in the window that just ended is held for
+// takeWindowDrops(), so the caller can report every truncated window once.
 class EchoBudget {
  public:
   EchoBudget(uint32_t maxLines = 8, uint32_t windowMs = 1000)
       : maxLines_(maxLines), windowMs_(windowMs) {}
   bool allow(uint32_t nowMs);
   uint32_t dropped() const { return dropped_; }
+  // Drops of the last completed window, then zero until the next completed
+  // window with drops. Call after allow().
+  uint32_t takeWindowDrops() {
+    uint32_t n = reported_;
+    reported_ = 0;
+    return n;
+  }
 
  private:
   uint32_t maxLines_, windowMs_;
   uint32_t windowStart_ = 0, count_ = 0, dropped_ = 0;
+  uint32_t windowDrops_ = 0, reported_ = 0;
   bool started_ = false;
 };
 

@@ -32,15 +32,18 @@ void Diagnostics::reset() {
 
 bool EchoBudget::allow(uint32_t nowMs) {
   if (!started_ || nowMs - windowStart_ >= windowMs_) {
+    if (started_ && windowDrops_ > 0) reported_ += windowDrops_;
     started_ = true;
     windowStart_ = nowMs;
     count_ = 0;
+    windowDrops_ = 0;
   }
   if (count_ < maxLines_) {
     count_++;
     return true;
   }
   dropped_++;
+  windowDrops_++;
   return false;
 }
 
