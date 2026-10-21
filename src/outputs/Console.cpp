@@ -2,6 +2,8 @@
 
 #include <WiFi.h>
 
+#include <cstring>
+
 #include "Version.h"
 #include "sensesp_app.h"
 

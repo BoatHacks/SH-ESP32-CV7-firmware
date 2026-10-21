@@ -1,6 +1,8 @@
 #include "Settings.h"
 
+#include <cmath>
 #include <cstdlib>
+#include <cstring>
 
 #include "SignalKPath.h"
 
