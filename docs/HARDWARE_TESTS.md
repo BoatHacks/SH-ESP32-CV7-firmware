@@ -98,7 +98,7 @@ the N2K display. Raw values are those from the sensor, before conditioning.
 
 | ID | What to do | Expected | Pass/Fail/Notes |
 |---|---|---|---|
-| G1 [human] | Look at a wind display or an analyzer. | PGN 130306 (reference apparent) with correct angle and speed. A display shows apparent wind without further setup. | |
+| G1 [human] | Look at a wind display or an analyzer. | PGN 130306 (reference apparent) with correct angle and speed. A display shows apparent wind without further setup. Done 2026-10-24: the boat chart plotter shows apparent wind, values look correct. |
 | G2 [human] | Look for PGN 130312. | Temperature (source and instance as set by `n2k_instance`) matches the sensor. | |
 | G3 [human] | `set n2k_instance 3`. | PGN 130312 now carries instance 3. Reset to 0. | |
 | G4 [auto] | `status`, `n2k_wind_sent` and `n2k_temp_sent`. | Both rise at the output interval while data is fresh. | |
@@ -114,7 +114,7 @@ the N2K display. Raw values are those from the sensor, before conditioning.
 
 | ID | What to do | Expected | Pass/Fail/Notes |
 |---|---|---|---|
-| I1 [auto] | `status reset`. Leave it running for at least 1 hour with WiFi, SignalK and the web UI in normal use. Then `status`; read `uptime_s`. | Expected per sentence type: 2 per second, so `lines_rx` is about 4 times `uptime_s` since the reset, `wind_ok` and `temp_ok` about 2 times `uptime_s` each. Record the shortfall. Dropped sentences under WiFi load show here. | |
+| I1 [auto] | `status reset`. Leave it running for at least 1 hour with WiFi, SignalK and the web UI in normal use. Then `status`; read `uptime_s`. | Expected per sentence type: 2 per second, so `lines_rx` is about 4 times `uptime_s` since the reset, `wind_ok` and `temp_ok` about 2 times `uptime_s` each. Record the shortfall. Dropped sentences under WiFi load show here. Interrupted 2026-10-23: 1 h run on the bench with one restart at minute 28 (board moved, power lost). Before and after, wind and temperature ran without gaps over wifi and N2K; wifi was down about 5 min after the restart (see the manual's rejoin note). Not a clean hour, repeat on the boat. |
 | I2 [auto] | Repeat I1 while loading WiFi (large download on the same network, many web UI reloads). | Same counts. Record any difference from I1. | |
 | I3 [auto] | Repeat I1 for 24 hours if I1 looks good. | No reboot (`uptime_s` is continuous), no growing rejects. | |
 
