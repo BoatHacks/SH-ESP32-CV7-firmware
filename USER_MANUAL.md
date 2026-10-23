@@ -100,6 +100,9 @@ The web page and the over-the-air update ship with default passwords:
 
 - Web page login: `admin` / `cv7admin`
 - Over-the-air update password: `cv7ota`
+- Setup access point (only while no WiFi is configured): network
+  `sh-esp32-cv7`, password `thisisfine`. This is SensESP's built-in default,
+  and this firmware has no build option to change it.
 
 This is a deliberate choice so the firmware works without a build step, on
 the assumption that the boat's WiFi is secure. To use your own, add build
@@ -116,11 +119,14 @@ build_flags =
 Setup uses SensESP's standard provisioning; *details to be confirmed on
 hardware*:
 
-1. Power the board. With no WiFi configured, it opens its own access point.
-2. Connect to it and enter your boat's WiFi network, and the address of
-   your SignalK server.
-3. Open the board's web page (its address is shown on your router or the
-   serial console) and log in (section 3.4).
+1. Power the board. With no WiFi configured, it opens its own access point
+   named `sh-esp32-cv7` (password `thisisfine`, section 3.4).
+2. Connect a phone or computer to it and open `http://192.168.4.1`. Log in
+   (section 3.4).
+3. Enter your boat's WiFi network and password, and the address of your
+   SignalK server. The board then restarts and joins your network. After
+   that, its web page is at `http://sh-esp32-cv7.local` or at the address
+   your router shows.
 4. On the SignalK server, approve the device's access request
    (Security, Access Requests). Without approval it can't publish.
 5. Open the card *CV7 sensor and outputs* and go through the settings in

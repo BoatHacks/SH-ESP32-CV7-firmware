@@ -6,6 +6,12 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- Manual: the setup access point name and password (`sh-esp32-cv7` /
+  `thisisfine`) and the setup page address are now documented (sections 3.4
+  and 4).
+
 ## [0.1.1] - 2026-10-23
 
 Fixes from a code review and from the first run on a real SH-ESP32. The board
