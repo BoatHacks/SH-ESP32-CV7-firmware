@@ -107,8 +107,8 @@ the N2K display. Raw values are those from the sensor, before conditioning.
 
 | ID | What to do | Expected | Pass/Fail/Notes |
 |---|---|---|---|
-| H1 [human] | With everything running, unplug the CV7 (or one signal wire). Time it. | After 3 seconds, wind and temperature stop on SignalK and N2K (displays show data missing). `n2k_wind_sent` stops rising, `last_wind_age_s` rises. | |
-| H2 [human] | Plug the CV7 back in. | Publishing resumes without a reboot. | |
+| H1 [human] | With everything running, unplug the CV7 (or one signal wire). Time it. | After 3 seconds, wind and temperature stop on SignalK and N2K (displays show data missing). `n2k_wind_sent` stops rising, `last_wind_age_s` rises. Done 2026-10-23: wind and temperature stopped on SignalK and N2K together; displays and counters not checked. |
+| H2 [human] | Plug the CV7 back in. | Publishing resumes without a reboot. Done 2026-10-23: all four streams resumed about 27 s after the unplug, no reboot seen. |
 
 ## I. Reliability
 
