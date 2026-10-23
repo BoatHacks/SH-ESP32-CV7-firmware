@@ -78,10 +78,10 @@ the N2K display. Raw values are those from the sensor, before conditioning.
 
 | ID | What to do | Expected | Pass/Fail/Notes |
 |---|---|---|---|
-| E1 [human] | `set angle_offset 30`. Compare published angle with `last_wind_angle_deg`. | Published angle is raw plus 30 degrees, wrapped to 0 to 360. Set back to 0. | |
-| E2 [human] | `set speed_scale 2`. | Published speed is twice the raw speed. Set back to 1. | |
-| E3 [human] | `set damping 5`. Move the vane quickly. | The published values change smoothly over about 5 seconds, raw values jump. `set damping 0` removes the smoothing. | |
-| E4 [human] | `set output_interval 5000`. Watch SignalK and `status` (`n2k_wind_sent`). | One wind and one temperature update about every 5 s on both outputs. `500` restores the sensor rate. Values below 500 are refused. | |
+| E1 [human] | `set angle_offset 30`. Compare published angle with `last_wind_angle_deg`. | Published angle is raw plus 30 degrees, wrapped to 0 to 360. Set back to 0. Done 2026-10-23 through the config API (offset 30: published angle moved by 29.7 deg against live wind), reset to 0. |
+| E2 [human] | `set speed_scale 2`. | Published speed is twice the raw speed. Set back to 1. Done 2026-10-23 through the config API (live wind, so the ratio is only roughly 2: 2.34), reset to 1. |
+| E3 [human] | `set damping 5`. Move the vane quickly. | The published values change smoothly over about 5 seconds, raw values jump. `set damping 0` removes the smoothing. Partly done 2026-10-23: damping 5 lowered the spread of published speed (stdev 0.57 to 0.37); step response not measured. |
+| E4 [human] | `set output_interval 5000`. Watch SignalK and `status` (`n2k_wind_sent`). | One wind and one temperature update about every 5 s on both outputs. `500` restores the sensor rate. Values below 500 are refused. Done 2026-10-23: about 1 wind update per second at 500 ms (21 in 20 s, the CV7 rate), 6 in 30 s at 5000 ms. Restored. |
 | E5 [human] | Change the same four settings in the web UI card "CV7 sensor and outputs" and save. | Same effects as E1 to E4, and the values survive a reboot (see J3). | |
 | E6 [human] | Change `rx_invert` to off with a working sensor, then on. | Reception stops while off (almost no valid sentences), returns when on (shows the setting is applied without a reboot). Done 2026-10-23 through the web UI, read via SignalK update counts. | Done 2026-10-23. |
 
@@ -98,7 +98,7 @@ the N2K display. Raw values are those from the sensor, before conditioning.
 
 | ID | What to do | Expected | Pass/Fail/Notes |
 |---|---|---|---|
-| G1 [human] | Look at a wind display or an analyzer. | PGN 130306 (reference apparent) with correct angle and speed. A display shows apparent wind without further setup. | |
+| G1 [human] | Look at a wind display or an analyzer. | PGN 130306 (reference apparent) with correct angle and speed. A display shows apparent wind without further setup. Done 2026-10-24: the boat chart plotter shows apparent wind, values look correct. |
 | G2 [human] | Look for PGN 130312. | Temperature (source and instance as set by `n2k_instance`) matches the sensor. | |
 | G3 [human] | `set n2k_instance 3`. | PGN 130312 now carries instance 3. Reset to 0. | |
 | G4 [auto] | `status`, `n2k_wind_sent` and `n2k_temp_sent`. | Both rise at the output interval while data is fresh. | |
@@ -114,7 +114,7 @@ the N2K display. Raw values are those from the sensor, before conditioning.
 
 | ID | What to do | Expected | Pass/Fail/Notes |
 |---|---|---|---|
-| I1 [auto] | `status reset`. Leave it running for at least 1 hour with WiFi, SignalK and the web UI in normal use. Then `status`; read `uptime_s`. | Expected per sentence type: 2 per second, so `lines_rx` is about 4 times `uptime_s` since the reset, `wind_ok` and `temp_ok` about 2 times `uptime_s` each. Record the shortfall. Dropped sentences under WiFi load show here. | |
+| I1 [auto] | `status reset`. Leave it running for at least 1 hour with WiFi, SignalK and the web UI in normal use. Then `status`; read `uptime_s`. | Expected per sentence type: 2 per second, so `lines_rx` is about 4 times `uptime_s` since the reset, `wind_ok` and `temp_ok` about 2 times `uptime_s` each. Record the shortfall. Dropped sentences under WiFi load show here. Interrupted 2026-10-23: 1 h run on the bench with one restart at minute 28 (board moved, power lost). Before and after, wind and temperature ran without gaps over wifi and N2K; wifi was down about 5 min after the restart (see the manual's rejoin note). Not a clean hour, repeat on the boat. |
 | I2 [auto] | Repeat I1 while loading WiFi (large download on the same network, many web UI reloads). | Same counts. Record any difference from I1. | |
 | I3 [auto] | Repeat I1 for 24 hours if I1 looks good. | No reboot (`uptime_s` is continuous), no growing rejects. | |
 
@@ -123,8 +123,8 @@ the N2K display. Raw values are those from the sensor, before conditioning.
 | ID | What to do | Expected | Pass/Fail/Notes |
 |---|---|---|---|
 | J1 [human] | Log in with the defaults, change the web UI password in the UI, log out and in. | New password works, old does not. | |
-| J2 [human] | Save settings in the card "CV7 sensor and outputs". | Saved without error. | |
-| J3 [human] | Reboot the board (reset button or power cycle). | All saved settings are unchanged, including WiFi and the SignalK token. | |
+| J2 [human] | Save settings in the card "CV7 sensor and outputs". | Saved without error. Done 2026-10-23 through the config API. |
+| J3 [human] | Reboot the board (reset button or power cycle). | All saved settings are unchanged, including WiFi and the SignalK token. Done 2026-10-23 for the CV7 settings (angle_offset 7, n2k_instance 3 survived a restart via the API); WiFi and token obviously kept. |
 | J4 [human] | OTA: build or download a second image (for example a `-ota.bin` of a later tag), upload it via the web UI with the OTA password `cv7ota`. | Upload completes, the board restarts on the new `version` (`status`), settings are kept. A wrong password is refused. Wrong password half done 2026-10-23: refused ("Authentication Failed"). The positive upload was done earlier. |
 | J5 [auto] | A bad or truncated image via OTA. | Update is rejected and the old firmware keeps running. Done 2026-10-23: image cut to 400000 of 1525104 bytes was rejected ("Error response from device"), board stayed on 0.1.2 and kept publishing. |
 
