@@ -6,6 +6,13 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-10-23
+
+Fixes from a code review and from the first run on a real SH-ESP32. The board
+boots, serves its web UI and answers the serial console with USB and the
+NMEA 2000 bus connected. The CV7 input and the NMEA 2000 output are still not
+verified on hardware.
+
 ### Fixed
 
 - Serial console and the version banner printed nothing, because `Serial.begin`
@@ -67,5 +74,6 @@ CV7 current loop, and the wire polarity, are open questions
   published as prereleases.
 - Apache-2.0 license.
 
-[Unreleased]: https://github.com/BoatHacks/SH-ESP32-CV7-firmware/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/BoatHacks/SH-ESP32-CV7-firmware/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/BoatHacks/SH-ESP32-CV7-firmware/releases/tag/v0.1.1
 [0.1.0]: https://github.com/BoatHacks/SH-ESP32-CV7-firmware/releases/tag/v0.1.0
