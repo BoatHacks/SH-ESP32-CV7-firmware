@@ -124,6 +124,9 @@ void publish() {
 }  // namespace
 
 void setup() {
+  // SensESP's SetupLogging() only sets the log level; without this the
+  // Serial object is never started and the console and banner stay silent.
+  Serial.begin(115200);
   SetupLogging();
   Serial.printf("SH-ESP32-CV7 firmware %s\n", CV7_FW_VERSION);
 
