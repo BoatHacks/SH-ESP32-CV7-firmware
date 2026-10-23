@@ -6,6 +6,14 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- System health in SignalK: `sensorDevice.sh-esp32-cv7.uptime`, `.freeMemory`,
+  `.systemHz`, `.ipAddress` and `.wifiSignalLevel`.
+- WiFi watchdog: the board restarts after 180 s without WiFi (editable in the
+  web UI card "WiFi Watchdog"). It arms only after the first connection, so a
+  board without a configured network keeps running.
+
 ### Changed
 
 - Manual: the setup access point name and password (`sh-esp32-cv7` /

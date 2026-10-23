@@ -202,6 +202,14 @@ The board connects to your SignalK server over WiFi and publishes:
 | `environment.wind.angleApparent` | radians, 0 to 2 pi, clockwise from the bow |
 | `environment.wind.speedApparent` | metres per second |
 | the temperature path (section 6) | kelvin |
+| `sensorDevice.sh-esp32-cv7.uptime` | seconds since the last restart |
+| `sensorDevice.sh-esp32-cv7.freeMemory` | free heap, bytes |
+| `sensorDevice.sh-esp32-cv7.systemHz` | main loop rate, per second |
+| `sensorDevice.sh-esp32-cv7.ipAddress` | the board's IP address |
+| `sensorDevice.sh-esp32-cv7.wifiSignalLevel` | WiFi signal, dB |
+
+The last five paths are the board's own health data. They follow the board's
+hostname, so a renamed board publishes under its new name.
 
 ### 7.3 Serial console
 
@@ -229,6 +237,21 @@ The keys are `angle_offset`, `speed_scale`, `damping`, `output_interval`,
 
 A line longer than 159 characters is ignored as a whole and answered with
 `error: line too long, ignored`; nothing from it is run as a command.
+
+### 7.3a Checking the board over the network
+
+With the board installed and no USB cable, these work over WiFi (log in with
+the web page login, section 3.4):
+
+- The web page status page shows the firmware version, uptime, free memory,
+  the reason for the last restart, WiFi signal and the SignalK connection.
+- `http://sh-esp32-cv7.local/api/log` returns the recent log lines as JSON
+  (a short rolling buffer, not a permanent log).
+- If the board loses WiFi for 180 seconds it restarts itself. The time can be
+  changed on the web page, card "WiFi Watchdog".
+
+There is no telnet or syslog output. The serial console (section 7.3) needs
+the USB cable.
 
 ### 7.4 If the sensor goes quiet
 
