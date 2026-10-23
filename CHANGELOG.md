@@ -9,7 +9,7 @@ All notable changes to this project are documented here. The format follows
 ## [0.1.1] - 2026-10-23
 
 Fixes from a code review and from the first run on a real SH-ESP32. The board
-boots, serves its web UI and answers the serial console with USB and the
+boots, starts its web server and answers the serial console with USB and the
 NMEA 2000 bus connected. The CV7 input and the NMEA 2000 output are still not
 verified on hardware.
 
