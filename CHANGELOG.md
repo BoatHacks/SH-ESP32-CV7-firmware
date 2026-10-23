@@ -8,6 +8,9 @@ All notable changes to this project are documented here. The format follows
 
 ### Fixed
 
+- Serial console and the version banner printed nothing, because `Serial.begin`
+  was never called (SensESP's `SetupLogging()` does not start it). The console
+  commands from the manual (section 7.3) now work. Found on hardware with 0.1.0.
 - `raw on`: a window that dropped lines now always prints one
   `rx: (N lines not shown)` note. Before, the note depended on the uptime
   and could stay silent for a sensor sending every 500 ms.
