@@ -134,6 +134,12 @@ void setup() {
   sensesp_app = builder.set_hostname("sh-esp32-cv7")
                     ->set_admin_user(CV7_ADMIN_USER, CV7_ADMIN_PASSWORD)
                     ->enable_ota(CV7_OTA_PASSWORD)
+                    // Restarts the board after 3 minutes without WiFi; the
+                    // timeout is editable on the web UI configuration page.
+                    ->enable_wifi_watchdog(180)
+                    // Uptime, free memory, loop rate, IP and WiFi level, sent
+                    // to SignalK as sensorDevice.sh-esp32-cv7.*
+                    ->enable_system_info_sensors()
                     ->get_app();
 
   // Read-only entry on the web UI status page.
