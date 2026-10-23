@@ -6,6 +6,12 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-10-23
+
+First release checked against a real CV7: the sensor is read through OPTO_IN
+and wind and temperature appear on NMEA 2000 and in SignalK (one board, one
+sensor).
+
 ### Added
 
 - System health in SignalK: `sensorDevice.sh-esp32-cv7.uptime`, `.freeMemory`,
@@ -16,6 +22,11 @@ All notable changes to this project are documented here. The format follows
 
 ### Changed
 
+- `rx_invert` now defaults to on. On the test unit (yellow to ISO_IN, green to
+  ISO_GND) the sensor decodes cleanly only with it on; with it off almost no
+  sentence got through. Boards that already saved the setting keep their saved
+  value, and a flash of the merged image resets it to the new default.
+- Manual, spec and test plan updated with the measured behaviour.
 - Manual: the setup access point name and password (`sh-esp32-cv7` /
   `thisisfine`) and the setup page address are now documented (sections 3.4
   and 4).
@@ -88,6 +99,7 @@ CV7 current loop, and the wire polarity, are open questions
   published as prereleases.
 - Apache-2.0 license.
 
-[Unreleased]: https://github.com/BoatHacks/SH-ESP32-CV7-firmware/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/BoatHacks/SH-ESP32-CV7-firmware/compare/v0.1.2...HEAD
+[0.1.2]: https://github.com/BoatHacks/SH-ESP32-CV7-firmware/releases/tag/v0.1.2
 [0.1.1]: https://github.com/BoatHacks/SH-ESP32-CV7-firmware/releases/tag/v0.1.1
 [0.1.0]: https://github.com/BoatHacks/SH-ESP32-CV7-firmware/releases/tag/v0.1.0

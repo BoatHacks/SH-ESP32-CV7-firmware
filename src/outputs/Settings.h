@@ -39,7 +39,7 @@ class Settings : public sensesp::FileSystemSaveable {
   String tempPath = "environment.outside.temperature";
   int n2kInstance = 0;
   int baud = 4800;
-  bool rxInvert = false;
+  bool rxInvert = true;
 
   // Incremented whenever a value changes, so consumers can re-apply.
   uint32_t revision() const { return revision_.load(); }

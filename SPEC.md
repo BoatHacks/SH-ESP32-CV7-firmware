@@ -90,14 +90,13 @@ Configuration survives restart (flash). Sensor readings are ephemeral.
 - **Output rate is firmware-side**: the CV7 has no documented serial command for its output rate, so the user-configurable rate is applied in the firmware (default: sensor rate), which also lets it be lowered to reduce bus load. Changing the sensor's own rate is not possible; the high-rate CV7-C or CV7-HR-OEM variants are separate hardware.
 - **PGN 130312 for temperature**: current Temperature PGN, as used by the CV7 WindyPlug V3. PGN 130311 is deprecated.
 - **Standard CV7 / CV7-V targeted**: 4800 baud, 500 ms sentence interval. Other variants (CV7-C, CV7-HR-OEM) are not covered by the MVP.
-- **No RX inversion by default**: the Sailor Hat's opto input idles high (LED off, pull-up) and goes low when current flows, which matches UART idle and start bit polarity for NMEA 0183. The `rx_invert` setting stays available as a fallback.
+- **RX inversion on by default**: measured on hardware with one CV7 and one SH-ESP32 (yellow to ISO_IN, green to ISO_GND): with inversion off, about one sentence decoded in 15 to 30 seconds and mostly corrupted bytes; with it on, every sentence decoded with no checksum errors. A reading of the schematic (opto output idles high, like UART idle) predicted off. The reason is not understood. `rx_invert` stays a setting for other sensors or variants.
+- **Current loop verified on OPTO_IN**: one CV7 drives the input and is read cleanly at 4800 baud. The voltage across ISO_IN and ISO_GND was not measured, so the compliance question stays unanswered for other units.
 - **Powered from the NMEA 2000 bus**: the board gets its 12 V and ground from the N2K drop cable, and the CV7 is powered from the same supply. There is no standalone mode without the bus, and the combined current draw of board and sensor counts against the bus power budget (the CV7 draw is not documented, see section 13).
 - **Default credentials**: the web UI and OTA ship with documented default passwords. Boat WiFi is assumed to be secure, and a working out-of-the-box firmware matters more for download-and-flash users than hardening against a LAN attacker. Changing them is a build-time option.
 - **Configurable temperature path**: the CV7 may be mounted somewhere other than outside (or a user may want a different instance), so the SignalK path is a setting, not a constant.
 
 ## 13. Open Questions
 
-- Whether the CV7's 4 mA current loop can drive OPTO_IN. Per the Sailor Hat schematic, the input is a 2.2k series resistor into an EL3H7 optocoupler LED, and Hat Labs documents it as working from about 2.5 V, so it needs well under 4 mA. If the CV7 output is a true current source, it needs roughly 10 V of compliance to push 4 mA through that resistor, and the CV7 documents no compliance figure. Settle with a measurement, or a question to LCJ.
-- Wire polarity at the CV7 end. The manual labels yellow "TX+" and green "RX-", so yellow to ISO_IN and green to ISO_GND is the expected wiring. Verify on hardware.
 - The combined current draw of the board and the CV7, and the resulting N2K load equivalence number. The LCJ manual gives no CV7 current figure; measure it.
-- Whether the board can be powered from USB and the N2K bus at the same time (relevant for flashing in place). Verify on hardware; until then flash with the bus disconnected.
+- Whether flashing over USB is safe while the N2K bus is connected. The board ran with both connected during a console session, but flashing that way was not tried; the manual still says to disconnect the bus.

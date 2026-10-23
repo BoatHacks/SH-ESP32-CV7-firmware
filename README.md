@@ -2,11 +2,11 @@
 
 Firmware for the Hat Labs Sailor Hat (SH-ESP32) that reads an LCJ Capteurs CV7 ultrasonic wind sensor (NMEA 0183, IIMWV and WIXDR) and republishes apparent wind and air temperature on NMEA 2000 (PGN 130306, PGN 130312) and SignalK. See the [User Manual](USER_MANUAL.md) for installing and using it, [SPEC.md](SPEC.md) and [ARCHITECTURE.md](ARCHITECTURE.md) for the design, the [changelog](CHANGELOG.md) for what each release contains, and the [hardware test plan](docs/HARDWARE_TESTS.md) for what still has to be checked on a real board.
 
-Status: the firmware compiles and the parser and conditioning code have native unit tests. It has not been verified on hardware, including whether OPTO_IN receives the CV7 current loop (SPEC section 13).
+Status: the firmware compiles and the parser and conditioning code have native unit tests. On one SH-ESP32 with one CV7 it reads the sensor through OPTO_IN (with `rx_invert` on, the default) and publishes wind and temperature to NMEA 2000 and SignalK. Much of the [hardware test plan](docs/HARDWARE_TESTS.md) is still untested.
 
 ## Wiring
 
-The CV7 output is a 4 mA current loop at 4800 baud. Connect it to the opto-isolated input OPTO_IN (GPIO 35): yellow (TX+) and green (RX-) per the LCJ manual. The board is powered from the NMEA 2000 bus through the drop cable (bus +12 V and NET-C to the power terminal; CAN H and L to the CAN terminals), and the CV7 (red +, blue 0 V) is powered from the same terminal. There is no standalone mode without the bus. Check the bus power budget: the CV7 current draw is not documented (*to be confirmed on hardware*). To flash over USB, disconnect the bus first (flashing with both connected is unverified). If nothing is received, try the `rx_invert` setting. CAN uses the board's transceiver (TX GPIO 32, RX GPIO 34).
+The CV7 output is a 4 mA current loop at 4800 baud. Connect it to the opto-isolated input OPTO_IN (GPIO 35): yellow (TX+) and green (RX-) per the LCJ manual. The board is powered from the NMEA 2000 bus through the drop cable (bus +12 V and NET-C to the power terminal; CAN H and L to the CAN terminals), and the CV7 (red +, blue 0 V) is powered from the same terminal. There is no standalone mode without the bus. Check the bus power budget: the CV7 current draw is not documented (*to be confirmed on hardware*). To flash over USB, disconnect the bus first (flashing with both connected is unverified). `rx_invert` is on by default, which this sensor needs; if nothing is received, try turning it off. CAN uses the board's transceiver (TX GPIO 32, RX GPIO 34).
 
 ## Build and flash
 

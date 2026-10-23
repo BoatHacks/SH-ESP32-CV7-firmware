@@ -33,7 +33,7 @@ Settings::Settings() : FileSystemSaveable("/cv7/settings") {
        "Baud rate of the NMEA 0183 input. The standard CV7 uses 4800.",
        Type::Int, &baud, 1200.0f, 115200.0f},
       {"rx_invert", "Invert RX signal",
-       "Invert the UART input, if the opto-isolator polarity requires it.",
+       "Invert the UART input. On by default: the CV7 needs it on the Sailor Hat input. Turn off only for troubleshooting.",
        Type::Bool, &rxInvert, 0, 1},
   };
   for (size_t i = 0; i < kFieldCount; i++) fields_[i] = f[i];
