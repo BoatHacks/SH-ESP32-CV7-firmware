@@ -125,8 +125,8 @@ the N2K display. Raw values are those from the sensor, before conditioning.
 | J1 [human] | Log in with the defaults, change the web UI password in the UI, log out and in. | New password works, old does not. | |
 | J2 [human] | Save settings in the card "CV7 sensor and outputs". | Saved without error. | |
 | J3 [human] | Reboot the board (reset button or power cycle). | All saved settings are unchanged, including WiFi and the SignalK token. | |
-| J4 [human] | OTA: build or download a second image (for example a `-ota.bin` of a later tag), upload it via the web UI with the OTA password `cv7ota`. | Upload completes, the board restarts on the new `version` (`status`), settings are kept. A wrong password is refused. | |
-| J5 [auto] | A bad or truncated image via OTA. | Update is rejected and the old firmware keeps running. | |
+| J4 [human] | OTA: build or download a second image (for example a `-ota.bin` of a later tag), upload it via the web UI with the OTA password `cv7ota`. | Upload completes, the board restarts on the new `version` (`status`), settings are kept. A wrong password is refused. Wrong password half done 2026-10-23: refused ("Authentication Failed"). The positive upload was done earlier. |
+| J5 [auto] | A bad or truncated image via OTA. | Update is rejected and the old firmware keeps running. Done 2026-10-23: image cut to 400000 of 1525104 bytes was rejected ("Error response from device"), board stayed on 0.1.2 and kept publishing. |
 
 ## K. CAN bus
 
