@@ -6,6 +6,11 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- Manual: troubleshooting now describes the delay in rejoining WiFi after a
+  power loss (about 86 seconds measured once on a Raspberry Pi access point).
+
 ## [0.1.2] - 2026-10-23
 
 First release checked against a real CV7: the sensor is read through OPTO_IN
