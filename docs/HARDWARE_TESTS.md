@@ -63,8 +63,8 @@ The console examples below show the expected keys, not exact values.
 
 | ID | What to do | Expected | Pass/Fail/Notes |
 |---|---|---|---|
-| D1 [human] | Wire the CV7: yellow to ISO_IN, green to ISO_GND. Power it from the bus supply. Run `status` twice, a few seconds apart. | `bytes_rx` and `lines_rx` rise, `wind_ok` and `temp_ok` rise, `rejected_checksum` stays at or near 0. This answers whether OPTO_IN receives the CV7 current loop at 4800 baud (SPEC section 13, first question). | |
-| D2 [human] | If D1 got nothing: swap yellow and green, and `status` again. If still nothing, `set rx_invert on`, `save`, `status`. | Record which combination of polarity and `rx_invert` works. The expected setup is yellow to ISO_IN, green to ISO_GND, `rx_invert` off (SPEC section 13, second question). | |
+| D1 [human] | Wire the CV7: yellow to ISO_IN, green to ISO_GND. Power it from the bus supply. Run `status` twice, a few seconds apart. | `bytes_rx` and `lines_rx` rise, `wind_ok` and `temp_ok` rise, `rejected_checksum` stays at or near 0. This answers whether OPTO_IN receives the CV7 current loop at 4800 baud. | Done 2026-10-23: sentences read cleanly with `rx_invert` on. |
+| D2 [human] | If D1 got nothing: swap yellow and green, and `status` again. If still nothing, `set rx_invert on`, `save`, `status`. | Record which combination of polarity and `rx_invert` works. Result on the first unit: yellow to ISO_IN, green to ISO_GND, `rx_invert` on (now the default). Unswapped, or inversion off, almost nothing decoded. | Done 2026-10-23, one board and one CV7. |
 | D3 [human] | With the CV7 running, measure the voltage across ISO_IN and ISO_GND (DC). | Record the voltage. About 2.5 V or more is needed to turn the optocoupler on; a true current source would need about 10 V. This answers SPEC section 13. | |
 | D4 [auto] | `raw on` and read the sentences. | `$IIMWV,<angle>,R,<speed>,N,A*hh` and `$WIXDR,C,<temp>,C,...*hh` with plausible values. `raw off`. | |
 | D5 [human] | Turn the vane by hand or blow on the sensor. | `last_wind_angle_deg` and `last_wind_speed_kn` in `status` follow the wind. Angle is 0 to 359, clockwise from the bow mark. | |
@@ -83,7 +83,7 @@ the N2K display. Raw values are those from the sensor, before conditioning.
 | E3 [human] | `set damping 5`. Move the vane quickly. | The published values change smoothly over about 5 seconds, raw values jump. `set damping 0` removes the smoothing. | |
 | E4 [human] | `set output_interval 5000`. Watch SignalK and `status` (`n2k_wind_sent`). | One wind and one temperature update about every 5 s on both outputs. `500` restores the sensor rate. Values below 500 are refused. | |
 | E5 [human] | Change the same four settings in the web UI card "CV7 sensor and outputs" and save. | Same effects as E1 to E4, and the values survive a reboot (see J3). | |
-| E6 [human] | Change `rx_invert` to on with a working sensor, then off. | Reception stops while inverted, returns when off (shows the setting is applied without a reboot). | |
+| E6 [human] | Change `rx_invert` to off with a working sensor, then on. | Reception stops while off (almost no valid sentences), returns when on (shows the setting is applied without a reboot). Done 2026-10-23 through the web UI, read via SignalK update counts. | Done 2026-10-23. |
 
 ## F. SignalK
 

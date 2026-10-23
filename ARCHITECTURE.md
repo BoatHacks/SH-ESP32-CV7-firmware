@@ -7,7 +7,7 @@ Requirements live in [SPEC.md](SPEC.md). This document covers how the firmware i
 ```
 CV7 --(4 mA loop, 4800 baud)--> OPTO_IN (GPIO 35)
                                      |
-                              UART2 RX (inverted if needed)
+                              UART2 RX (inverted by default)
                                      |
                          NMEA 0183 line reader + parser
                          (IIMWV, WIXDR, checksum check)
@@ -25,7 +25,7 @@ SensESP provides the WiFi stack, web UI, configuration storage, OTA and the Sign
 ## 2. System Components
 
 ### 2.1 NMEA 0183 input
-Owns UART2 (RX remapped to GPIO 35, optional RX inversion). Reads lines, validates the checksum, and emits typed readings from IIMWV and WIXDR. Drops anything else, including PLCJ/PLCJE. Tracks the time of the last valid sentence so the outputs can time out (SPEC section 5).
+Owns UART2 (RX remapped to GPIO 35, RX inversion on by default). Reads lines, validates the checksum, and emits typed readings from IIMWV and WIXDR. Drops anything else, including PLCJ/PLCJE. Tracks the time of the last valid sentence so the outputs can time out (SPEC section 5).
 
 ### 2.2 Conditioning
 Applies the wind speed scale factor, wind angle offset and damping, in that order. Pure functions with no hardware dependencies.

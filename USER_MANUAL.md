@@ -12,7 +12,9 @@ server (section 4), then adjust the settings (section 6). Section 7 covers
 day-to-day use, and section 8 what to do when something doesn't work.
 
 **Status:** the firmware builds and its parser and filtering code have unit
-tests, but it has not yet been run on a real board with a real sensor.
+tests. It has been run on one real board with one real CV7: the sensor is
+read and wind and temperature appear on NMEA 2000 and in SignalK. Much of
+the rest is still untested.
 Steps marked *to be confirmed on hardware* describe the intended behaviour
 and may need correcting. What the firmware is meant to do is in
 [SPEC.md](SPEC.md), and how it is built is in
@@ -41,9 +43,9 @@ real hardware is in [docs/HARDWARE_TESTS.md](docs/HARDWARE_TESTS.md).
   is not yet known (*to be confirmed on hardware*).
 - There is no standalone mode: the board runs only while the bus is powered
   (or from USB, see section 3.1).
-- The CV7 output is not checked for compatibility with the board's input
-  until it has been tried (see section 8). Don't connect the sensor to a
-  boat's only wind instrument path until it works.
+- The CV7 output has been tested against the board's input on one unit only.
+  Check that your sensor is read (section 8) before relying on it as a
+  boat's only wind instrument path.
 
 ## 3. Installing the firmware
 
@@ -175,7 +177,7 @@ Settings are saved to flash and survive a restart.
 | Temperature SignalK path | `environment.outside.temperature` | Where the air temperature goes in SignalK, in kelvin. Dot separated names made of letters, digits and underscore, no spaces and no empty parts (for example `environment.inside.temperature`); anything else is rejected with an error. Takes effect after saving. |
 | N2K temperature instance | 0 | The instance number in the NMEA 2000 temperature message (PGN 130312). Range 0 to 252. |
 | Sensor baud rate | 4800 | Baud rate of the sensor input. Leave at 4800 for the standard CV7. |
-| Invert RX signal | off | Inverts the sensor input. Only for troubleshooting (section 8). |
+| Invert RX signal | on | Inverts the sensor input. The CV7 needs it on at the Sailor Hat input (tested on one unit). Turn it off only for troubleshooting (section 8). |
 
 The same settings are on the USB serial console (section 7.3).
 
@@ -275,15 +277,15 @@ This is the most likely first problem, because the sensor's output has not
 yet been tried against the board's input on real hardware.
 
 1. Check the CV7 has power (red and blue wires, 8 to 33 V).
-2. Check the wire polarity: yellow to ISO_IN, green to ISO_GND. Swap them
-   if nothing arrives.
+2. Check the wire polarity: yellow to ISO_IN, green to ISO_GND. This is the
+   wiring that worked on the test unit. Swap them if nothing arrives.
 3. Open the serial console (section 7.3) and check `get` shows baud 4800.
    Run `status` twice a few seconds apart. If `bytes_rx` stays at 0, nothing
    reaches the input: recheck power and polarity. If `bytes_rx` rises but
    `lines_rx` or `wind_ok` do not, or `rejected_checksum` rises, the signal
    arrives garbled: check `baud`, and try step 4. `raw on` shows what is
    received.
-4. Try turning *Invert RX signal* on, then `save`, and run `status` again.
+4. Try turning *Invert RX signal* off (it is on by default), then `save`, and run `status` again.
 5. If still nothing, the sensor's loop may not be able to drive the
    board's input. Measure the voltage across ISO_IN and ISO_GND with the
    sensor running, and report it in the project's issues; this is an open
