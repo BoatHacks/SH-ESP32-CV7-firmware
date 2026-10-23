@@ -311,6 +311,22 @@ data (section 7.4).
 Check the device's access request was approved on the server (section 4,
 step 4), and that the board and the server are on the same network.
 
+### WiFi and SignalK come back late after a power loss
+
+After the board loses power and gets it back, it can take a minute or two to
+rejoin the WiFi network. Its NMEA 2000 output is not affected, because that
+does not use WiFi. On the test unit, with the network provided by a
+Raspberry Pi access point, the board was reachable again about 86 seconds
+after the power came back. A normal restart (for example after an update over
+the air) takes 3 to 4 seconds. The likely cause is that the access point
+still lists the board as connected from before the power loss, and accepts
+the new join only after it drops that old entry. This was seen once, on one
+access point; other routers may behave differently.
+
+If the board is still missing after 3 minutes, the WiFi watchdog (web page,
+card "WiFi Watchdog", default 180 seconds) restarts it. Restarting the
+access point also clears the stale entry.
+
 ### The web page won't take the login
 
 The defaults are in section 3.4. If you built with your own passwords, use
